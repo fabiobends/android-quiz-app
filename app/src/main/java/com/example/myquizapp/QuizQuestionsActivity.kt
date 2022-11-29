@@ -4,12 +4,8 @@ import android.graphics.Color
 import android.graphics.Typeface
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.View
-import android.widget.Button
-import android.widget.ImageView
-import android.widget.ProgressBar
-import android.widget.TextView
+import android.widget.*
 import androidx.core.content.ContextCompat
 
 class QuizQuestionsActivity : AppCompatActivity(), View.OnClickListener {
@@ -25,7 +21,7 @@ class QuizQuestionsActivity : AppCompatActivity(), View.OnClickListener {
 
   private var currentPosition: Int = 1
   private var questionsList: ArrayList<Question>? = null
-  private var selectedOptionPosition: Int = 0
+  private var selectedOptionPosition: Int = Int.MAX_VALUE
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -51,6 +47,7 @@ class QuizQuestionsActivity : AppCompatActivity(), View.OnClickListener {
   }
 
   private fun setQuestion() {
+    defaultOptionsView()
     val question: Question = questionsList!![currentPosition - 1]
     progressBar?.progress = currentPosition
     progressFraction?.text = "$currentPosition / ${progressBar?.max}"
@@ -62,7 +59,10 @@ class QuizQuestionsActivity : AppCompatActivity(), View.OnClickListener {
 
     if (currentPosition == questionsList!!.size) {
       submitButton?.text = "Finish"
+    } else {
+      submitButton?.text = "Go to the next"
     }
+
   }
 
   override fun onClick(view: View?) {
@@ -88,8 +88,26 @@ class QuizQuestionsActivity : AppCompatActivity(), View.OnClickListener {
         }
       }
       R.id.submit_button -> {
-        // TODO
-        Log.i("test", selectedOptionPosition.toString())
+        if (selectedOptionPosition == Int.MAX_VALUE) {
+          currentPosition++
+          when {
+            currentPosition <= questionsList!!.size -> {
+              setQuestion()
+            }
+            else -> {
+              Toast.makeText(this, "You made it to the end", Toast.LENGTH_LONG).show()
+            }
+          }
+        } else {
+          val question = questionsList?.get(currentPosition - 1)
+          if (question!!.correctAnswer != selectedOptionPosition) {
+            answerView(selectedOptionPosition, R.drawable.wrong_option_bg)
+          }
+
+          answerView(question.correctAnswer, R.drawable.correct_option_bg)
+          selectedOptionPosition = Int.MAX_VALUE
+        }
+
       }
 
     }
@@ -120,11 +138,39 @@ class QuizQuestionsActivity : AppCompatActivity(), View.OnClickListener {
   }
 
   private fun selectedOptionView(textView: TextView, selectedOptionNumber: Int) {
-    defaultOptionsView()
     selectedOptionPosition = selectedOptionNumber
     textView.setTextColor(Color.parseColor("#7a8089"))
     textView.setTypeface(textView.typeface, Typeface.BOLD)
     textView.background = ContextCompat.getDrawable(this, R.drawable.selected_option_border_bg)
+  }
+
+  private fun answerView(answer: Int, drawableView: Int) {
+    when (answer) {
+      0 -> {
+        optionOne?.background = ContextCompat.getDrawable(
+          this,
+          drawableView
+        )
+      }
+      1 -> {
+        optionTwo?.background = ContextCompat.getDrawable(
+          this,
+          drawableView
+        )
+      }
+      2 -> {
+        optionThree?.background = ContextCompat.getDrawable(
+          this,
+          drawableView
+        )
+      }
+      3 -> {
+        optionFour?.background = ContextCompat.getDrawable(
+          this,
+          drawableView
+        )
+      }
+    }
   }
 
 }
