@@ -6,4 +6,5 @@
     <string name="start">Start</string>
     <string name="submit">Submit</string>
     <string name="question">What country does this flag belong to?</string>
+    <string name="app_greeting">Quiz App!</string>
 </resources>
