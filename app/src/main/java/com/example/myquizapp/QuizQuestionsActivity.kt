@@ -1,5 +1,6 @@
 package com.example.myquizapp
 
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.Typeface
 import androidx.appcompat.app.AppCompatActivity
@@ -22,10 +23,14 @@ class QuizQuestionsActivity : AppCompatActivity(), View.OnClickListener {
   private var currentPosition: Int = 1
   private var questionsList: ArrayList<Question>? = null
   private var selectedOptionPosition: Int = Int.MAX_VALUE
+  private var userName: String? = null
+  private var correctAnswers: Int = 0
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_quiz_questions)
+
+    userName = intent.getStringExtra(Constants.USER_NAME)
 
     progressBar = findViewById(R.id.progress_bar)
     progressFraction = findViewById(R.id.progress_fraction)
@@ -95,13 +100,20 @@ class QuizQuestionsActivity : AppCompatActivity(), View.OnClickListener {
               setQuestion()
             }
             else -> {
-              Toast.makeText(this, "You made it to the end", Toast.LENGTH_LONG).show()
+              val intent = Intent(this, ResultActivity::class.java)
+              intent.putExtra(Constants.USER_NAME, userName)
+              intent.putExtra(Constants.TOTAL_QUESTIONS, questionsList?.size)
+              intent.putExtra(Constants.CORRECT_ANSWERS, correctAnswers)
+              startActivity(intent)
+              finish()
             }
           }
         } else {
           val question = questionsList?.get(currentPosition - 1)
           if (question!!.correctAnswer != selectedOptionPosition) {
             answerView(selectedOptionPosition, R.drawable.wrong_option_bg)
+          } else {
+            correctAnswers++
           }
 
           answerView(question.correctAnswer, R.drawable.correct_option_bg)
@@ -138,6 +150,7 @@ class QuizQuestionsActivity : AppCompatActivity(), View.OnClickListener {
   }
 
   private fun selectedOptionView(textView: TextView, selectedOptionNumber: Int) {
+    defaultOptionsView()
     selectedOptionPosition = selectedOptionNumber
     textView.setTextColor(Color.parseColor("#7a8089"))
     textView.setTypeface(textView.typeface, Typeface.BOLD)
